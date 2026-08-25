@@ -1,13 +1,12 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import { env } from "../config.ts";
 import prisma from "../db.ts";
 import { sendMail } from "../mail.ts";
-import jwt from "jsonwebtoken";
 
 const router = Router();
-
-
 
 router.post("/login", async (req, res) => {
   try {
@@ -21,11 +20,7 @@ router.post("/login", async (req, res) => {
     if (!match) return res.status(401).json({ error: "invalid credentials" });
     if (!user.isVerified) return res.status(403).json({ error: "email not verified" });
 
-    const token = jwt.sign(
-      { sub: user.id, email: user.email },
-      process.env.JWT_SECRET!,
-      { expiresIn: "7d" }
-    );
+    const token = jwt.sign({ sub: user.id, email: user.email }, env.jwtSecret, { expiresIn: "7d" });
 
     res.json({
       token,
@@ -68,7 +63,7 @@ router.post("/register", async (req, res) => {
     await sendMail({
       to: email,
       subject: "Verify your account",
-      text: `${process.env.APP_URL}/auth/verify?token=${token}`,
+      text: `${env.appUrl}/auth/verify?token=${token}`,
     });
 
     res.status(201).json({
@@ -79,7 +74,6 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ error: "register failed" });
   }
 });
-
 
 router.get("/verify", async (req, res) => {
   try {
@@ -128,7 +122,7 @@ router.post("/forgot-password", async (req, res) => {
     await sendMail({
       to: email,
       subject: "Reset password",
-      text: `${process.env.APP_URL}/reset-password?token=${token}`,
+      text: `${env.appUrl}/reset-password?token=${token}`,
     });
     res.json(generic);
   } catch (err) {
@@ -162,6 +156,5 @@ router.post("/reset-password", async (req, res) => {
     res.status(500).json({ error: "reset failed" });
   }
 });
-
 
 export default router;

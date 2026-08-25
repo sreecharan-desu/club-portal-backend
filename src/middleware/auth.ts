@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { env } from "../config.ts";
 import prisma from "../db.ts";
 
 export type AuthedRequest = Request & {
@@ -13,7 +14,7 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
       return res.status(401).json({ error: "unauthorized" });
     }
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as { sub: string; email: string };
+    const payload = jwt.verify(token, env.jwtSecret) as { sub: string; email: string };
     const user = await prisma.user.findUnique({ where: { id: payload.sub } });
     if (!user) return res.status(401).json({ error: "unauthorized" });
 
