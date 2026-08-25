@@ -1,0 +1,26 @@
+name: Deploy API
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci && npx tsc --noEmit
+      - uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd /var/www/club-portal-backend
+            git pull origin main
+            npm ci
+            npx prisma generate
+            pm2 restart club-api || pm2 start "npx tsx src/server.ts" --name club-api
