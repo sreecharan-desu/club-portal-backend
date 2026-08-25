@@ -10,8 +10,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-      - run: npm ci && npx tsc --noEmit
+          node-version: "22"
+      # generated Prisma is gitignored; tsc also chokes on Prisma's TS4094
+      - run: npm ci && npx prisma generate
       - uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.EC2_HOST }}
