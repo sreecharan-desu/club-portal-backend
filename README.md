@@ -1,30 +1,28 @@
-# Club portal API
+# club-portal-backend
 
-Public repo: https://github.com/sreecharan-desu/club-portal-backend
+club portal api: member auth, a members chat room and event-day q&a.
 
-Express + TypeScript. One process. Neon for members. Amazon SES for mail. No MailDev. No extra frameworks.
+## features
 
-```text
-src/
-  config.ts              required env. crash if missing
-  app.ts                 cors, json, mount routes
-  server.ts              listen 0.0.0.0
-  db.ts                  one Prisma client
-  mail.ts                SES SendEmail only
-  prisma.config.ts       Prisma 6 paths from repo root
-  middleware/auth.ts     Bearer JWT
-  routes/health.ts       GET /health — no database
-  routes/auth.ts         register, login, verify, forgot, reset
-  routes/me.ts           GET /me
-  routes/chat.ts         POST /chat — members room
-  routes/ask.ts          POST /ask — event-day answer + sources
-```
+- register, login, email verify, forgot and reset password
+- `GET /me` behind bearer jwt
+- `POST /chat` for the members room
+- `POST /ask` for event-day answers with sources
+- `GET /health` without a database
+
+## stack
+
+express 5 · typescript (tsx) · prisma · neon postgres · amazon ses
+
+## run locally
 
 ```bash
 npm ci
-npx prisma generate
-npx prisma db push
+cp .env.example .env
+npx prisma generate && npx prisma db push
 npm run dev
 ```
 
-`.env` is not in git. Live `.env` is written by GitHub Actions from repo secrets.
+## env
+
+copy `.env.example` to `.env`: `DATABASE_URL`, `JWT_SECRET`, `APP_URL`, `MAIL_FROM`, `AWS_REGION`. the server exits if a required one is missing. production `.env` is written by github actions from repo secrets.
